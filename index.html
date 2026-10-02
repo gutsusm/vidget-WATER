@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Water Tracker</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #191919;
+      --card: #202020;
+      --surface: #292929;
+      --surface-2: #242424;
+      --border: #363636;
+
+      --text: #f2f2f2;
+      --muted: #929292;
+
+      --accent: #4fa66a;
+      --accent-hover: #5db878;
+      --accent-dark: #397d50;
+      --accent-soft: #263d2d;
+
+      --glass: #292929;
+      --glass-border: #353535;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      color: var(--text);
+
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+
+      padding: 18px;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    .widget {
+      position: relative;
+
+      width: 100%;
+      max-width: 470px;
+      min-height: 525px;
+
+      background: var(--card);
+
+      border: 1px solid var(--border);
+      border-radius: 20px;
+
+      padding: 24px;
+
+      overflow: hidden;
+    }
+
+    /* little dot */
+
+    .status-dot {
+      position: absolute;
+      top: 12px;
+      right: 13px;
+
+      width: 10px;
+      height: 10px;
+
+      border-radius: 50%;
+
+      background: var(--accent);
+
+      box-shadow:
+        0 0 8px rgba(79, 166, 106, .65);
+    }
+
+    /* NAVIGATION */
+
+    .nav {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+
+      background: var(--surface-2);
+
+      border-radius: 8px;
+
+      padding: 6px;
+
+      margin: 0 auto 30px;
+
+      max-width: 365px;
+    }
+
+    .nav-button {
+      border: none;
+      background: transparent;
+
+      color: var(--muted);
+
+      padding: 12px 8px;
+
+      border-radius: 7px;
+
+      font-size: 18px;
+
+      cursor: pointer;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+
+      transition: .2s ease;
+    }
+
+    .nav-button:hover {
+      color: var(--text);
+    }
+
+    .nav-button.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* VIEWS */
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* =========================
+       CARD
+    ========================= */
+
+    .glasses {
+      display: grid;
+
+      grid-template-columns: repeat(5, 1fr);
+
+      gap: 16px;
+
+      margin-top: 18px;
+    }
+
+    .glass {
+      height: 105px;
+
+      position: relative;
+
+      overflow: hidden;
+
+      background: var(--glass);
+
+      border: 1px solid var(--glass-border);
+
+      clip-path: polygon(
+        7% 0,
+        93% 0,
+        84% 100%,
+        16% 100%
+      );
+    }
+
+    .water {
+      position: absolute;
+
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      height: 0%;
+
+      background: var(--accent);
+
+      transition: height .4s ease;
+    }
+
+    /*
+      Slight wave shape on top of water.
+    */
+
+    .water::before {
+      content: "";
+
+      position: absolute;
+
+      width: 130%;
+      height: 20px;
+
+      top: -10px;
+      left: -15%;
+
+      border-radius: 45% 55% 50% 45%;
+
+      background: var(--accent);
+    }
+
+    .daily-area {
+      margin-top: 53px;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+
+      padding: 0 10px 4px;
+    }
+
+    .daily-label {
+      color: var(--accent);
+
+      font-weight: 700;
+      font-size: 21px;
+
+      margin-bottom: 15px;
+    }
+
+    .daily-value {
+      font-size: 46px;
+
+      font-weight: 500;
+
+      line-height: 1;
+
+      color: var(--text);
+    }
+
+    .add-button {
+      width: 74px;
+      height: 74px;
+
+      flex-shrink: 0;
+
+      border-radius: 50%;
+
+      border: 1px solid var(--border);
+
+      background: var(--surface);
+
+      color: var(--accent);
+
+      font-size: 47px;
+      font-weight: 200;
+
+      cursor: pointer;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      line-height: 1;
+
+      transition:
+        background .2s ease,
+        transform .15s ease;
+    }
+
+    .add-button:hover {
+      background: #303030;
+    }
+
+    .add-button:active {
+      transform: scale(.94);
+    }
+
+    /* =========================
+       TABLE
+    ========================= */
+
+    .date-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      margin-bottom: 24px;
+    }
+
+    .date-title {
+      font-size: 22px;
+      font-weight: 600;
+
+      color: var(--text);
+    }
+
+    .date-controls {
+      display: flex;
+      gap: 14px;
+    }
+
+    .arrow-button {
+      background: none;
+      border: none;
+
+      color: var(--accent);
+
+      font-size: 27px;
+
+      cursor: pointer;
+
+      padding: 3px;
+    }
+
+    .total-box {
+      background: var(--surface);
+
+      border-radius: 7px;
+
+      padding: 16px;
+
+      font-size: 19px;
+
+      color: var(--accent);
+
+      margin-bottom: 20px;
+    }
+
+    .history-table {
+      width: 100%;
+
+      border-collapse: collapse;
+    }
+
+    .history-table th {
+      color: var(--accent);
+
+      font-size: 15px;
+      font-weight: 700;
+
+      padding: 10px 5px 13px;
+
+      text-align: center;
+    }
+
+    .history-table td {
+      color: var(--muted);
+
+      font-size: 15px;
+
+      padding: 14px 5px;
+
+      text-align: center;
+
+      border-top: 1px solid var(--border);
+    }
+
+    .history-table td.cumulative {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .delete-button {
+      border: none;
+      background: none;
+
+      color: var(--accent);
+
+      cursor: pointer;
+
+      font-size: 19px;
+    }
+
+    .empty-message {
+      text-align: center;
+
+      color: var(--muted);
+
+      padding: 35px 0;
+
+      font-size: 15px;
+    }
+
+    /* =========================
+       GRAPH
+    ========================= */
+
+    .graph-title {
+      font-size: 23px;
+      font-weight: 600;
+
+      margin-bottom: 30px;
+    }
+
+    .chart {
+      height: 245px;
+
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+
+      gap: 13px;
+
+      align-items: end;
+    }
+
+    .chart-day {
+      height: 100%;
+
+      display: flex;
+      flex-direction: column;
+
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .bar-container {
+      width: 100%;
+      max-width: 44px;
+
+      height: 180px;
+
+      background: var(--surface);
+
+      border-radius: 7px;
+
+      position: relative;
+
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      position: absolute;
+
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      height: 0%;
+
+      background: var(--accent);
+
+      border-radius: 7px;
+
+      transition: height .5s ease;
+    }
+
+    .day-name {
+      margin-top: 17px;
+
+      color: var(--accent);
+
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .day-value {
+      color: var(--muted);
+
+      font-size: 12px;
+
+      margin-top: 6px;
+    }
+
+    /* =========================
+       MODAL
+    ========================= */
+
+    .modal-overlay {
+      position: fixed;
+
+      inset: 0;
+
+      background: rgba(0, 0, 0, .55);
+
+      display: none;
+
+      justify-content: center;
+      align-items: center;
+
+      padding: 20px;
+
+      z-index: 100;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 330px;
+
+      background: #242424;
+
+      border: 1px solid var(--border);
+
+      border-radius: 16px;
+
+      padding: 23px;
+    }
+
+    .modal h3 {
+      font-size: 20px;
+
+      margin-bottom: 18px;
+    }
+
+    .quick-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+
+      gap: 8px;
+
+      margin-bottom: 13px;
+    }
+
+    .quick {
+      border: 1px solid var(--border);
+
+      background: var(--surface);
+
+      color: var(--text);
+
+      padding: 10px 5px;
+
+      border-radius: 7px;
+
+      cursor: pointer;
+    }
+
+    .quick:hover {
+      border-color: var(--accent);
+    }
+
+    .amount-input {
+      width: 100%;
+
+      background: #191919;
+
+      border: 1px solid var(--border);
+
+      outline: none;
+
+      color: var(--text);
+
+      font-size: 17px;
+
+      padding: 12px;
+
+      border-radius: 7px;
+
+      margin-bottom: 13px;
+    }
+
+    .amount-input:focus {
+      border-color: var(--accent);
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+
+      gap: 9px;
+    }
+
+    .modal-btn {
+      border: none;
+
+      border-radius: 7px;
+
+      padding: 11px;
+
+      font-size: 15px;
+
+      cursor: pointer;
+    }
+
+    .cancel {
+      background: var(--surface);
+      color: var(--muted);
+    }
+
+    .confirm {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 430px) {
+
+      body {
+        padding: 10px;
+      }
+
+      .widget {
+        padding: 20px 14px;
+      }
+
+      .nav-button {
+        font-size: 16px;
+      }
+
+      .glasses {
+        gap: 9px;
+      }
+
+      .glass {
+        height: 92px;
+      }
+
+      .daily-value {
+        font-size: 40px;
+      }
+
+      .chart {
+        gap: 7px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="widget">
+
+  <div class="status-dot"></div>
+
+  <!-- NAV -->
+
+  <div class="nav">
+
+    <button class="nav-button active" data-view="card">
+
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+        <line x1="8" y1="3" x2="8" y2="7"></line>
+        <line x1="16" y1="3" x2="16" y2="7"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+
+      Card
+
+    </button>
+
+
+    <button class="nav-button" data-view="table">
+
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <line x1="5" y1="7" x2="19" y2="7"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <line x1="5" y1="17" x2="19" y2="17"></line>
+      </svg>
+
+      Table
+
+    </button>
+
+
+    <button class="nav-button" data-view="graph">
+
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <rect x="4" y="13" width="4" height="7"></rect>
+        <rect x="10" y="8" width="4" height="12"></rect>
+        <rect x="16" y="4" width="4" height="16"></rect>
+      </svg>
+
+      Graph
+
+    </button>
+
+  </div>
+
+
+  <!-- CARD VIEW -->
+
+  <section id="card" class="view active">
+
+    <div class="glasses" id="glasses"></div>
+
+    <div class="daily-area">
+
+      <div>
+
+        <div class="daily-label">
+          DAILY RESULT
+        </div>
+
+        <div class="daily-value">
+          <span id="dailyAmount">0</span> ml
+        </div>
+
+      </div>
+
+      <button class="add-button" id="openModal">
+        +
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- TABLE VIEW -->
+
+  <section id="table" class="view">
+
+    <div class="date-row">
+
+      <div class="date-title" id="dateTitle"></div>
+
+      <div class="date-controls">
+
+        <button class="arrow-button" id="previousDay">
+          ‹
+        </button>
+
+        <button class="arrow-button" id="nextDay">
+          ›
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="total-box">
+      Total: <span id="tableTotal">0</span> ml
+    </div>
+
+
+    <table class="history-table">
+
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Amount</th>
+          <th>Cumulative</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody id="historyBody"></tbody>
+
+    </table>
+
+    <div id="emptyHistory" class="empty-message">
+      No water entries for this day.
+    </div>
+
+  </section>
+
+
+  <!-- GRAPH VIEW -->
+
+  <section id="graph" class="view">
+
+    <div class="graph-title">
+      Weekly Water Intake
+    </div>
+
+    <div class="chart" id="chart"></div>
+
+  </section>
+
+</div>
+
+
+<!-- ADD WATER MODAL -->
+
+<div class="modal-overlay" id="modal">
+
+  <div class="modal">
+
+    <h3>Add water</h3>
+
+    <div class="quick-buttons">
+
+      <button class="quick" data-amount="200">
+        200 ml
+      </button>
+
+      <button class="quick" data-amount="250">
+        250 ml
+      </button>
+
+      <button class="quick" data-amount="500">
+        500 ml
+      </button>
+
+    </div>
+
+    <input
+      id="amountInput"
+      class="amount-input"
+      type="number"
+      min="1"
+      placeholder="Amount in ml"
+    >
+
+    <div class="modal-actions">
+
+      <button
+        class="modal-btn cancel"
+        id="cancelModal"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="modal-btn confirm"
+        id="addWater"
+      >
+        Add
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  /* =============================
+     SETTINGS
+  ============================== */
+
+  const DAILY_GOAL = 2000;
+  const GLASS_COUNT = 10;
+  const GLASS_SIZE = DAILY_GOAL / GLASS_COUNT;
+
+
+  /* =============================
+     DATA
+  ============================== */
+
+  let records =
+    JSON.parse(localStorage.getItem("waterTrackerRecords")) || {};
+
+  let selectedDate = new Date();
+
+
+  function saveRecords() {
+
+    localStorage.setItem(
+      "waterTrackerRecords",
+      JSON.stringify(records)
+    );
+
+  }
+
+
+  /* =============================
+     DATE HELPERS
+  ============================== */
+
+  function dateKey(date) {
+
+    const year = date.getFullYear();
+
+    const month =
+      String(date.getMonth() + 1).padStart(2, "0");
+
+    const day =
+      String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+
+  }
+
+
+  function getEntries(date) {
+
+    return records[dateKey(date)] || [];
+
+  }
+
+
+  function getTotal(date) {
+
+    return getEntries(date)
+      .reduce((total, entry) => total + entry.amount, 0);
+
+  }
+
+
+  function isSameDay(a, b) {
+
+    return dateKey(a) === dateKey(b);
+
+  }
+
+
+  /* =============================
+     NAVIGATION
+  ============================== */
+
+  const navButtons =
+    document.querySelectorAll(".nav-button");
+
+  const views =
+    document.querySelectorAll(".view");
+
+
+  navButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      navButtons.forEach(btn =>
+        btn.classList.remove("active")
+      );
+
+      views.forEach(view =>
+        view.classList.remove("active")
+      );
+
+      button.classList.add("active");
+
+      document
+        .getElementById(button.dataset.view)
+        .classList.add("active");
+
+
+      if (button.dataset.view === "table") {
+        renderTable();
+      }
+
+      if (button.dataset.view === "graph") {
+        renderGraph();
+      }
+
+    });
+
+  });
+
+
+  /* =============================
+     GLASSES
+  ============================== */
+
+  const glassesElement =
+    document.getElementById("glasses");
+
+
+  function createGlasses() {
+
+    glassesElement.innerHTML = "";
+
+    for (let i = 0; i < GLASS_COUNT; i++) {
+
+      const glass = document.createElement("div");
+
+      glass.className = "glass";
+
+      glass.innerHTML =
+        `<div class="water"></div>`;
+
+      glassesElement.appendChild(glass);
+
+    }
+
+  }
+
+
+  function renderCard() {
+
+    const today = new Date();
+
+    const total = getTotal(today);
+
+    document.getElementById("dailyAmount")
+      .textContent = total;
+
+
+    const waters =
+      document.querySelectorAll(".water");
+
+
+    waters.forEach((water, index) => {
+
+      const glassStart =
+        index * GLASS_SIZE;
+
+      let fill =
+        ((total - glassStart) / GLASS_SIZE) * 100;
+
+      fill = Math.max(0, Math.min(100, fill));
+
+      water.style.height = fill + "%";
+
+    });
+
+  }
+
+
+  /* =============================
+     ADD WATER
+  ============================== */
+
+  const modal =
+    document.getElementById("modal");
+
+  const amountInput =
+    document.getElementById("amountInput");
+
+
+  document
+    .getElementById("openModal")
+    .addEventListener("click", () => {
+
+      amountInput.value = "";
+
+      modal.classList.add("open");
+
+      setTimeout(() => amountInput.focus(), 100);
+
+    });
+
+
+  document
+    .getElementById("cancelModal")
+    .addEventListener("click", closeModal);
+
+
+  modal.addEventListener("click", event => {
+
+    if (event.target === modal) {
+      closeModal();
+    }
+
+  });
+
+
+  function closeModal() {
+
+    modal.classList.remove("open");
+
+  }
+
+
+  document
+    .querySelectorAll(".quick")
+    .forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        amountInput.value =
+          button.dataset.amount;
+
+      });
+
+    });
+
+
+  document
+    .getElementById("addWater")
+    .addEventListener("click", addWater);
+
+
+  amountInput.addEventListener("keydown", event => {
+
+    if (event.key === "Enter") {
+      addWater();
+    }
+
+  });
+
+
+  function addWater() {
+
+    const amount =
+      Number(amountInput.value);
+
+    if (!amount || amount <= 0) {
+      return;
+    }
+
+
+    const now = new Date();
+
+    const key = dateKey(now);
+
+
+    if (!records[key]) {
+      records[key] = [];
+    }
+
+
+    records[key].push({
+
+      id: Date.now(),
+
+      amount: amount,
+
+      timestamp: now.toISOString()
+
+    });
+
+
+    saveRecords();
+
+    closeModal();
+
+    renderCard();
+
+  }
+
+
+  /* =============================
+     TABLE
+  ============================== */
+
+  function renderTable() {
+
+    const entries =
+      getEntries(selectedDate);
+
+
+    const total =
+      getTotal(selectedDate);
+
+
+    document.getElementById("tableTotal")
+      .textContent = total;
+
+
+    document.getElementById("dateTitle")
+      .textContent =
+      selectedDate
+        .toLocaleDateString(
+          "en-US",
+          {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+          }
+        )
+        .toUpperCase();
+
+
+    const body =
+      document.getElementById("historyBody");
+
+    const empty =
+      document.getElementById("emptyHistory");
+
+
+    body.innerHTML = "";
+
+
+    if (entries.length === 0) {
+
+      empty.style.display = "block";
+
+      return;
+
+    }
+
+
+    empty.style.display = "none";
+
+
+    let cumulative = 0;
+
+
+    entries.forEach(entry => {
+
+      cumulative += entry.amount;
+
+
+      const date =
+        new Date(entry.timestamp);
+
+
+      const time =
+        date.toLocaleTimeString(
+          "en-US",
+          {
+            hour: "2-digit",
+            minute: "2-digit"
+          }
+        );
+
+
+      const row =
+        document.createElement("tr");
+
+
+      row.innerHTML = `
+
+        <td>${time}</td>
+
+        <td>+${entry.amount} ml</td>
+
+        <td class="cumulative">
+          ${cumulative} ml
+        </td>
+
+        <td>
+
+          <button
+            class="delete-button"
+            data-id="${entry.id}"
+          >
+            ♡
+          </button>
+
+        </td>
+
+      `;
+
+
+      body.appendChild(row);
+
+    });
+
+
+    document
+      .querySelectorAll(".delete-button")
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => deleteEntry(
+            Number(button.dataset.id)
+          )
+        );
+
+      });
+
+  }
+
+
+  function deleteEntry(id) {
+
+    const key =
+      dateKey(selectedDate);
+
+
+    if (!records[key]) {
+      return;
+    }
+
+
+    records[key] =
+      records[key].filter(
+        entry => entry.id !== id
+      );
+
+
+    if (records[key].length === 0) {
+      delete records[key];
+    }
+
+
+    saveRecords();
+
+    renderTable();
+
+    renderCard();
+
+  }
+
+
+  document
+    .getElementById("previousDay")
+    .addEventListener("click", () => {
+
+      selectedDate.setDate(
+        selectedDate.getDate() - 1
+      );
+
+      selectedDate =
+        new Date(selectedDate);
+
+      renderTable();
+
+    });
+
+
+  document
+    .getElementById("nextDay")
+    .addEventListener("click", () => {
+
+      selectedDate.setDate(
+        selectedDate.getDate() + 1
+      );
+
+      selectedDate =
+        new Date(selectedDate);
+
+      renderTable();
+
+    });
+
+
+  /* =============================
+     GRAPH
+  ============================== */
+
+  function getWeekDates() {
+
+    const today =
+      new Date();
+
+
+    const day =
+      today.getDay();
+
+
+    /*
+      Monday = first day
+    */
+
+    const difference =
+      day === 0 ? -6 : 1 - day;
+
+
+    const monday =
+      new Date(today);
+
+
+    monday.setDate(
+      today.getDate() + difference
+    );
+
+
+    const dates = [];
+
+
+    for (let i = 0; i < 7; i++) {
+
+      const date =
+        new Date(monday);
+
+      date.setDate(
+        monday.getDate() + i
+      );
+
+      dates.push(date);
+
+    }
+
+
+    return dates;
+
+  }
+
+
+  function renderGraph() {
+
+    const chart =
+      document.getElementById("chart");
+
+
+    chart.innerHTML = "";
+
+
+    const dates =
+      getWeekDates();
+
+
+    dates.forEach(date => {
+
+      const total =
+        getTotal(date);
+
+
+      /*
+        Graph maximum = daily goal.
+      */
+
+      const percentage =
+        Math.min(
+          100,
+          (total / DAILY_GOAL) * 100
+        );
+
+
+      const day =
+        document.createElement("div");
+
+
+      day.className =
+        "chart-day";
+
+
+      const dayName =
+        date
+          .toLocaleDateString(
+            "en-US",
+            { weekday: "short" }
+          )
+          .toUpperCase();
+
+
+      day.innerHTML = `
+
+        <div class="bar-container">
+
+          <div
+            class="bar-fill"
+            style="height:${percentage}%"
+          ></div>
+
+        </div>
+
+        <div class="day-name">
+          ${dayName}
+        </div>
+
+        <div class="day-value">
+          ${total}ml
+        </div>
+
+      `;
+
+
+      chart.appendChild(day);
+
+    });
+
+  }
+
+
+  /* =============================
+     INITIALIZE
+  ============================== */
+
+  createGlasses();
+
+  renderCard();
+
+  renderTable();
+
+  renderGraph();
+
+</script>
+
+</body>
+</html>
