@@ -1,709 +1,1462 @@
-<style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-:root {
-  --bg: #191919;
-  --card: #202020;
-  --surface: #292929;
-  --surface-2: #242424;
-  --border: #363636;
+  <title>Water Tracker</title>
 
-  --text: #f2f2f2;
-  --muted: #929292;
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  --accent: #4fa66a;
-  --accent-hover: #5db878;
-  --accent-dark: #397d50;
-  --accent-soft: #263d2d;
+    :root {
+      --bg: #191919;
+      --card: #202020;
+      --surface: #292929;
+      --surface-2: #242424;
+      --border: #363636;
 
-  --glass: #292929;
-  --glass-border: #353535;
-}
+      --text: #f2f2f2;
+      --muted: #929292;
 
-html,
-body {
-  width: 100%;
-  min-width: 0;
-  min-height: 0;
-  background: var(--bg);
-}
+      --accent: #4fa66a;
+      --accent-hover: #5db878;
+      --accent-dark: #397d50;
+      --accent-soft: #263d2d;
 
-body {
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: var(--text);
-  padding: clamp(4px, 2.5vw, 18px);
-  overflow-x: hidden;
-}
+      --glass: #292929;
+      --glass-border: #353535;
+    }
 
-button,
-input {
-  font-family: inherit;
-}
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
 
-/* =========================
-   WIDGET
-========================= */
+      color: var(--text);
 
-.widget {
-  position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
 
-  width: 100%;
-  max-width: 470px;
+      padding: 18px;
+    }
 
-  /* ВАЖНО: никакой фиксированной высоты */
-  min-height: 0;
+    button {
+      font-family: inherit;
+    }
 
-  margin: 0 auto;
+    .widget {
+      position: relative;
 
-  background: var(--card);
-  border: 1px solid var(--border);
+      width: 100%;
+      max-width: 470px;
+      min-height: 525px;
 
-  border-radius: clamp(10px, 4vw, 20px);
+      background: var(--card);
 
-  padding: clamp(9px, 5vw, 24px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
 
-  overflow: hidden;
-}
+      padding: 24px;
 
-.status-dot {
-  position: absolute;
+      overflow: hidden;
+    }
 
-  top: clamp(6px, 2.5vw, 12px);
-  right: clamp(7px, 2.7vw, 13px);
+    /* little dot */
 
-  width: clamp(5px, 2vw, 10px);
-  aspect-ratio: 1;
+    .status-dot {
+      position: absolute;
+      top: 12px;
+      right: 13px;
 
-  border-radius: 50%;
+      width: 10px;
+      height: 10px;
 
-  background: var(--accent);
+      border-radius: 50%;
 
-  box-shadow: 0 0 8px rgba(79, 166, 106, .65);
-}
+      background: var(--accent);
 
-/* =========================
-   NAV
-========================= */
+      box-shadow:
+        0 0 8px rgba(79, 166, 106, .65);
+    }
 
-.nav {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* NAVIGATION */
 
-  width: 88%;
-  max-width: 365px;
+    .nav {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
 
-  margin: 0 auto clamp(12px, 6vw, 30px);
+      background: var(--surface-2);
 
-  padding: clamp(2px, 1.2vw, 6px);
+      border-radius: 8px;
 
-  background: var(--surface-2);
+      padding: 6px;
 
-  border-radius: clamp(5px, 1.8vw, 8px);
-}
+      margin: 0 auto 30px;
 
-.nav-button {
-  min-width: 0;
+      max-width: 365px;
+    }
 
-  border: none;
-  background: transparent;
+    .nav-button {
+      border: none;
+      background: transparent;
 
-  color: var(--muted);
+      color: var(--muted);
 
-  padding:
-    clamp(6px, 2.5vw, 12px)
-    clamp(2px, 1.5vw, 8px);
+      padding: 12px 8px;
 
-  border-radius: 7px;
+      border-radius: 7px;
 
-  font-size: clamp(10px, 4vw, 18px);
+      font-size: 18px;
 
-  cursor: pointer;
+      cursor: pointer;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
 
-  gap: clamp(3px, 1.7vw, 9px);
+      transition: .2s ease;
+    }
 
-  transition: .2s ease;
-}
+    .nav-button:hover {
+      color: var(--text);
+    }
 
-.nav-button:hover {
-  color: var(--text);
-}
+    .nav-button.active {
+      background: var(--accent);
+      color: white;
+    }
 
-.nav-button.active {
-  background: var(--accent);
-  color: white;
-}
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
 
-.nav-icon {
-  width: clamp(10px, 3.8vw, 18px);
-  height: clamp(10px, 3.8vw, 18px);
+    /* VIEWS */
 
-  flex-shrink: 0;
+    .view {
+      display: none;
+    }
 
-  stroke: currentColor;
-  fill: none;
+    .view.active {
+      display: block;
+    }
 
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
+    /* =========================
+       CARD
+    ========================= */
 
-/* =========================
-   VIEWS
-========================= */
+    .glasses {
+      display: grid;
 
-.view {
-  display: none;
-}
+      grid-template-columns: repeat(5, 1fr);
 
-.view.active {
-  display: block;
-}
+      gap: 16px;
 
-/* =========================
-   CARD
-========================= */
+      margin-top: 18px;
+    }
 
-.glasses {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+    .glass {
+      height: 105px;
 
-  gap: clamp(4px, 3vw, 16px);
+      position: relative;
 
-  margin-top: clamp(7px, 3.5vw, 18px);
-}
+      overflow: hidden;
 
-.glass {
-  position: relative;
+      background: var(--glass);
 
-  width: 100%;
+      border: 1px solid var(--glass-border);
 
-  /* Высота теперь зависит от ширины стакана */
-  aspect-ratio: 0.62 / 1;
+      clip-path: polygon(
+        7% 0,
+        93% 0,
+        84% 100%,
+        16% 100%
+      );
+    }
 
-  overflow: hidden;
+    .water {
+      position: absolute;
 
-  background: var(--glass);
+      left: 0;
+      right: 0;
+      bottom: 0;
 
-  border: 1px solid var(--glass-border);
+      height: 0%;
 
-  clip-path: polygon(
-    7% 0,
-    93% 0,
-    84% 100%,
-    16% 100%
-  );
-}
+      background: var(--accent);
 
-.water {
-  position: absolute;
+      transition: height .4s ease;
+    }
 
-  left: 0;
-  right: 0;
-  bottom: 0;
+    /*
+      Slight wave shape on top of water.
+    */
 
-  height: 0%;
+    .water::before {
+      content: "";
 
-  background: var(--accent);
+      position: absolute;
 
-  transition: height .4s ease;
-}
+      width: 130%;
+      height: 20px;
 
-.water::before {
-  content: "";
+      top: -10px;
+      left: -15%;
 
-  position: absolute;
+      border-radius: 45% 55% 50% 45%;
 
-  width: 130%;
-  height: 15%;
+      background: var(--accent);
+    }
 
-  top: -7%;
-  left: -15%;
+    .daily-area {
+      margin-top: 53px;
 
-  border-radius: 45% 55% 50% 45%;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
 
-  background: var(--accent);
-}
+      padding: 0 10px 4px;
+    }
 
-.daily-area {
-  margin-top: clamp(15px, 10vw, 53px);
+    .daily-label {
+      color: var(--accent);
 
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+      font-weight: 700;
+      font-size: 21px;
 
-  gap: 10px;
+      margin-bottom: 15px;
+    }
 
-  padding:
-    0
-    clamp(3px, 2vw, 10px)
-    clamp(2px, 1vw, 4px);
-}
+    .daily-value {
+      font-size: 46px;
 
-.daily-label {
-  color: var(--accent);
+      font-weight: 500;
 
-  font-weight: 700;
+      line-height: 1;
 
-  font-size: clamp(11px, 4.5vw, 21px);
+      color: var(--text);
+    }
 
-  margin-bottom: clamp(5px, 3vw, 15px);
-}
+    .add-button {
+      width: 74px;
+      height: 74px;
 
-.daily-value {
-  font-size: clamp(23px, 10vw, 46px);
+      flex-shrink: 0;
 
-  font-weight: 500;
+      border-radius: 50%;
 
-  line-height: 1;
+      border: 1px solid var(--border);
 
-  color: var(--text);
+      background: var(--surface);
 
-  white-space: nowrap;
-}
+      color: var(--accent);
 
-.add-button {
-  width: clamp(38px, 16vw, 74px);
+      font-size: 47px;
+      font-weight: 200;
 
-  aspect-ratio: 1;
+      cursor: pointer;
 
-  flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
 
-  border-radius: 50%;
+      line-height: 1;
 
-  border: 1px solid var(--border);
+      transition:
+        background .2s ease,
+        transform .15s ease;
+    }
 
-  background: var(--surface);
+    .add-button:hover {
+      background: #303030;
+    }
 
-  color: var(--accent);
+    .add-button:active {
+      transform: scale(.94);
+    }
 
-  font-size: clamp(25px, 10vw, 47px);
-  font-weight: 200;
+    /* =========================
+       TABLE
+    ========================= */
 
-  cursor: pointer;
+    .date-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
+      margin-bottom: 24px;
+    }
 
-  line-height: 1;
+    .date-title {
+      font-size: 22px;
+      font-weight: 600;
 
-  transition:
-    background .2s ease,
-    transform .15s ease;
-}
+      color: var(--text);
+    }
 
-.add-button:hover {
-  background: #303030;
-}
+    .date-controls {
+      display: flex;
+      gap: 14px;
+    }
 
-.add-button:active {
-  transform: scale(.94);
-}
+    .arrow-button {
+      background: none;
+      border: none;
 
-/* =========================
-   TABLE
-========================= */
+      color: var(--accent);
 
-.date-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+      font-size: 27px;
 
-  gap: 8px;
+      cursor: pointer;
 
-  margin-bottom: clamp(10px, 5vw, 24px);
-}
+      padding: 3px;
+    }
 
-.date-title {
-  min-width: 0;
+    .total-box {
+      background: var(--surface);
 
-  font-size: clamp(12px, 4.7vw, 22px);
-  font-weight: 600;
+      border-radius: 7px;
 
-  color: var(--text);
-}
+      padding: 16px;
 
-.date-controls {
-  display: flex;
+      font-size: 19px;
 
-  gap: clamp(5px, 3vw, 14px);
+      color: var(--accent);
 
-  flex-shrink: 0;
-}
+      margin-bottom: 20px;
+    }
 
-.arrow-button {
-  background: none;
-  border: none;
+    .history-table {
+      width: 100%;
 
-  color: var(--accent);
+      border-collapse: collapse;
+    }
 
-  font-size: clamp(19px, 6vw, 27px);
+    .history-table th {
+      color: var(--accent);
 
-  cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
 
-  padding: 2px;
-}
+      padding: 10px 5px 13px;
 
-.total-box {
-  background: var(--surface);
+      text-align: center;
+    }
 
-  border-radius: 7px;
+    .history-table td {
+      color: var(--muted);
 
-  padding: clamp(8px, 3.5vw, 16px);
+      font-size: 15px;
 
-  font-size: clamp(11px, 4vw, 19px);
+      padding: 14px 5px;
 
-  color: var(--accent);
+      text-align: center;
 
-  margin-bottom: clamp(8px, 4vw, 20px);
-}
+      border-top: 1px solid var(--border);
+    }
 
-.history-table {
-  width: 100%;
+    .history-table td.cumulative {
+      color: var(--text);
+      font-weight: 600;
+    }
 
-  border-collapse: collapse;
+    .delete-button {
+      border: none;
+      background: none;
 
-  table-layout: fixed;
-}
+      color: var(--accent);
 
-.history-table th {
-  color: var(--accent);
+      cursor: pointer;
 
-  font-size: clamp(8px, 3.1vw, 15px);
-  font-weight: 700;
+      font-size: 19px;
+    }
 
-  padding:
-    clamp(5px, 2vw, 10px)
-    1px
-    clamp(6px, 2.5vw, 13px);
+    .empty-message {
+      text-align: center;
 
-  text-align: center;
+      color: var(--muted);
 
-  overflow: hidden;
-}
+      padding: 35px 0;
 
-.history-table td {
-  color: var(--muted);
+      font-size: 15px;
+    }
 
-  font-size: clamp(8px, 3.1vw, 15px);
+    /* =========================
+       GRAPH
+    ========================= */
 
-  padding:
-    clamp(7px, 3vw, 14px)
-    1px;
+    .graph-title {
+      font-size: 23px;
+      font-weight: 600;
 
-  text-align: center;
+      margin-bottom: 30px;
+    }
 
-  border-top: 1px solid var(--border);
+    .chart {
+      height: 245px;
 
-  overflow: hidden;
-}
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
 
-.history-table td.cumulative {
-  color: var(--text);
-  font-weight: 600;
-}
+      gap: 13px;
 
-.delete-button {
-  border: none;
-  background: none;
+      align-items: end;
+    }
 
-  color: var(--accent);
+    .chart-day {
+      height: 100%;
 
-  cursor: pointer;
+      display: flex;
+      flex-direction: column;
 
-  font-size: clamp(12px, 4vw, 19px);
-}
+      justify-content: flex-end;
+      align-items: center;
+    }
 
-.empty-message {
-  text-align: center;
+    .bar-container {
+      width: 100%;
+      max-width: 44px;
 
-  color: var(--muted);
+      height: 180px;
 
-  padding: clamp(15px, 7vw, 35px) 0;
+      background: var(--surface);
 
-  font-size: clamp(10px, 3.2vw, 15px);
-}
+      border-radius: 7px;
 
-/* =========================
-   GRAPH
-========================= */
+      position: relative;
 
-.graph-title {
-  font-size: clamp(13px, 5vw, 23px);
+      overflow: hidden;
+    }
 
-  font-weight: 600;
+    .bar-fill {
+      position: absolute;
 
-  margin-bottom: clamp(12px, 6vw, 30px);
-}
+      left: 0;
+      right: 0;
+      bottom: 0;
 
-.chart {
-  /*
-    Высота графика теперь зависит от ширины виджета.
-  */
-  height: clamp(130px, 52vw, 245px);
+      height: 0%;
 
-  display: grid;
+      background: var(--accent);
 
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+      border-radius: 7px;
 
-  gap: clamp(3px, 2.5vw, 13px);
+      transition: height .5s ease;
+    }
 
-  align-items: end;
-}
+    .day-name {
+      margin-top: 17px;
 
-.chart-day {
-  height: 100%;
+      color: var(--accent);
 
-  min-width: 0;
+      font-size: 13px;
+      font-weight: 600;
+    }
 
-  display: flex;
-  flex-direction: column;
+    .day-value {
+      color: var(--muted);
 
-  justify-content: flex-end;
-  align-items: center;
-}
+      font-size: 12px;
 
-.bar-container {
-  width: 100%;
-  max-width: 44px;
+      margin-top: 6px;
+    }
 
-  flex: 1;
+    /* =========================
+       MODAL
+    ========================= */
 
-  min-height: 60px;
+    .modal-overlay {
+      position: fixed;
 
-  background: var(--surface);
+      inset: 0;
 
-  border-radius: clamp(3px, 1.5vw, 7px);
+      background: rgba(0, 0, 0, .55);
 
-  position: relative;
+      display: none;
 
-  overflow: hidden;
-}
+      justify-content: center;
+      align-items: center;
 
-.bar-fill {
-  position: absolute;
+      padding: 20px;
 
-  left: 0;
-  right: 0;
-  bottom: 0;
+      z-index: 100;
+    }
 
-  height: 0%;
+    .modal-overlay.open {
+      display: flex;
+    }
 
-  background: var(--accent);
+    .modal {
+      width: 100%;
+      max-width: 330px;
 
-  border-radius: inherit;
+      background: #242424;
 
-  transition: height .5s ease;
-}
+      border: 1px solid var(--border);
 
-.day-name {
-  margin-top: clamp(7px, 3.5vw, 17px);
+      border-radius: 16px;
 
-  color: var(--accent);
+      padding: 23px;
+    }
 
-  font-size: clamp(8px, 2.8vw, 13px);
+    .modal h3 {
+      font-size: 20px;
 
-  font-weight: 600;
-}
+      margin-bottom: 18px;
+    }
 
-.day-value {
-  color: var(--muted);
+    .quick-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
 
-  font-size: clamp(7px, 2.5vw, 12px);
+      gap: 8px;
 
-  margin-top: clamp(2px, 1.2vw, 6px);
+      margin-bottom: 13px;
+    }
 
-  white-space: nowrap;
-}
+    .quick {
+      border: 1px solid var(--border);
 
-/* =========================
-   MODAL
-========================= */
+      background: var(--surface);
 
-.modal-overlay {
-  position: fixed;
+      color: var(--text);
 
-  inset: 0;
+      padding: 10px 5px;
 
-  background: rgba(0, 0, 0, .55);
+      border-radius: 7px;
 
-  display: none;
+      cursor: pointer;
+    }
 
-  justify-content: center;
-  align-items: center;
+    .quick:hover {
+      border-color: var(--accent);
+    }
 
-  padding: 12px;
+    .amount-input {
+      width: 100%;
 
-  z-index: 100;
-}
+      background: #191919;
 
-.modal-overlay.open {
-  display: flex;
-}
+      border: 1px solid var(--border);
 
-.modal {
-  width: min(330px, 94vw);
+      outline: none;
 
-  background: #242424;
+      color: var(--text);
 
-  border: 1px solid var(--border);
+      font-size: 17px;
 
-  border-radius: 16px;
+      padding: 12px;
 
-  padding: clamp(14px, 5vw, 23px);
-}
+      border-radius: 7px;
 
-.modal h3 {
-  font-size: clamp(16px, 5vw, 20px);
+      margin-bottom: 13px;
+    }
 
-  margin-bottom: 18px;
-}
+    .amount-input:focus {
+      border-color: var(--accent);
+    }
 
-.quick-buttons {
-  display: grid;
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
 
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+    }
 
-  gap: 8px;
+    .modal-btn {
+      border: none;
 
-  margin-bottom: 13px;
-}
+      border-radius: 7px;
 
-.quick {
-  border: 1px solid var(--border);
+      padding: 11px;
 
-  background: var(--surface);
+      font-size: 15px;
 
-  color: var(--text);
+      cursor: pointer;
+    }
 
-  padding: 10px 3px;
+    .cancel {
+      background: var(--surface);
+      color: var(--muted);
+    }
 
-  border-radius: 7px;
+    .confirm {
+      background: var(--accent);
+      color: white;
+    }
 
-  font-size: clamp(10px, 3.5vw, 14px);
+    /* MOBILE */
 
-  cursor: pointer;
-}
+    @media (max-width: 430px) {
 
-.quick:hover {
-  border-color: var(--accent);
-}
+      body {
+        padding: 10px;
+      }
 
-.amount-input {
-  width: 100%;
+      .widget {
+        padding: 20px 14px;
+      }
 
-  background: #191919;
+      .nav-button {
+        font-size: 16px;
+      }
 
-  border: 1px solid var(--border);
+      .glasses {
+        gap: 9px;
+      }
 
-  outline: none;
+      .glass {
+        height: 92px;
+      }
 
-  color: var(--text);
+      .daily-value {
+        font-size: 40px;
+      }
 
-  font-size: 16px;
+      .chart {
+        gap: 7px;
+      }
+    }
 
-  padding: 12px;
+  </style>
+</head>
 
-  border-radius: 7px;
+<body>
 
-  margin-bottom: 13px;
-}
+<div class="widget">
 
-.amount-input:focus {
-  border-color: var(--accent);
-}
+  <div class="status-dot"></div>
 
-.modal-actions {
-  display: grid;
+  <!-- NAV -->
 
-  grid-template-columns: 1fr 1fr;
+  <div class="nav">
 
-  gap: 9px;
-}
+    <button class="nav-button active" data-view="card">
 
-.modal-btn {
-  border: none;
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+        <line x1="8" y1="3" x2="8" y2="7"></line>
+        <line x1="16" y1="3" x2="16" y2="7"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
 
-  border-radius: 7px;
+      Card
 
-  padding: 11px;
+    </button>
 
-  font-size: 14px;
 
-  cursor: pointer;
-}
+    <button class="nav-button" data-view="table">
 
-.cancel {
-  background: var(--surface);
-  color: var(--muted);
-}
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <line x1="5" y1="7" x2="19" y2="7"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <line x1="5" y1="17" x2="19" y2="17"></line>
+      </svg>
 
-.confirm {
-  background: var(--accent);
-  color: white;
-}
+      Table
 
-/* =========================
-   EXTRA SMALL NOTION BLOCK
-========================= */
+    </button>
 
-@media (max-width: 280px) {
 
-  body {
-    padding: 3px;
+    <button class="nav-button" data-view="graph">
+
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <rect x="4" y="13" width="4" height="7"></rect>
+        <rect x="10" y="8" width="4" height="12"></rect>
+        <rect x="16" y="4" width="4" height="16"></rect>
+      </svg>
+
+      Graph
+
+    </button>
+
+  </div>
+
+
+  <!-- CARD VIEW -->
+
+  <section id="card" class="view active">
+
+    <div class="glasses" id="glasses"></div>
+
+    <div class="daily-area">
+
+      <div>
+
+        <div class="daily-label">
+          DAILY RESULT
+        </div>
+
+        <div class="daily-value">
+          <span id="dailyAmount">0</span> ml
+        </div>
+
+      </div>
+
+      <button class="add-button" id="openModal">
+        +
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- TABLE VIEW -->
+
+  <section id="table" class="view">
+
+    <div class="date-row">
+
+      <div class="date-title" id="dateTitle"></div>
+
+      <div class="date-controls">
+
+        <button class="arrow-button" id="previousDay">
+          ‹
+        </button>
+
+        <button class="arrow-button" id="nextDay">
+          ›
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="total-box">
+      Total: <span id="tableTotal">0</span> ml
+    </div>
+
+
+    <table class="history-table">
+
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Amount</th>
+          <th>Cumulative</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody id="historyBody"></tbody>
+
+    </table>
+
+    <div id="emptyHistory" class="empty-message">
+      No water entries for this day.
+    </div>
+
+  </section>
+
+
+  <!-- GRAPH VIEW -->
+
+  <section id="graph" class="view">
+
+    <div class="graph-title">
+      Weekly Water Intake
+    </div>
+
+    <div class="chart" id="chart"></div>
+
+  </section>
+
+</div>
+
+
+<!-- ADD WATER MODAL -->
+
+<div class="modal-overlay" id="modal">
+
+  <div class="modal">
+
+    <h3>Add water</h3>
+
+    <div class="quick-buttons">
+
+      <button class="quick" data-amount="200">
+        200 ml
+      </button>
+
+      <button class="quick" data-amount="250">
+        250 ml
+      </button>
+
+      <button class="quick" data-amount="500">
+        500 ml
+      </button>
+
+    </div>
+
+    <input
+      id="amountInput"
+      class="amount-input"
+      type="number"
+      min="1"
+      placeholder="Amount in ml"
+    >
+
+    <div class="modal-actions">
+
+      <button
+        class="modal-btn cancel"
+        id="cancelModal"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="modal-btn confirm"
+        id="addWater"
+      >
+        Add
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  /* =============================
+     SETTINGS
+  ============================== */
+
+  const DAILY_GOAL = 2000;
+  const GLASS_COUNT = 10;
+  const GLASS_SIZE = DAILY_GOAL / GLASS_COUNT;
+
+
+  /* =============================
+     DATA
+  ============================== */
+
+  let records =
+    JSON.parse(localStorage.getItem("waterTrackerRecords")) || {};
+
+  let selectedDate = new Date();
+
+
+  function saveRecords() {
+
+    localStorage.setItem(
+      "waterTrackerRecords",
+      JSON.stringify(records)
+    );
+
   }
 
-  .widget {
-    padding: 8px;
+
+  /* =============================
+     DATE HELPERS
+  ============================== */
+
+  function dateKey(date) {
+
+    const year = date.getFullYear();
+
+    const month =
+      String(date.getMonth() + 1).padStart(2, "0");
+
+    const day =
+      String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+
   }
 
-  .nav {
-    width: 94%;
+
+  function getEntries(date) {
+
+    return records[dateKey(date)] || [];
+
   }
 
-  .nav-button {
-    font-size: 9px;
-    gap: 2px;
+
+  function getTotal(date) {
+
+    return getEntries(date)
+      .reduce((total, entry) => total + entry.amount, 0);
+
   }
 
-  .glasses {
-    gap: 3px;
+
+  function isSameDay(a, b) {
+
+    return dateKey(a) === dateKey(b);
+
   }
 
-  .daily-area {
-    margin-top: 13px;
-  }
-}
 
-@media (max-width: 210px) {
+  /* =============================
+     NAVIGATION
+  ============================== */
 
-  .nav-button {
-    font-size: 0;
+  const navButtons =
+    document.querySelectorAll(".nav-button");
+
+  const views =
+    document.querySelectorAll(".view");
+
+
+  navButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      navButtons.forEach(btn =>
+        btn.classList.remove("active")
+      );
+
+      views.forEach(view =>
+        view.classList.remove("active")
+      );
+
+      button.classList.add("active");
+
+      document
+        .getElementById(button.dataset.view)
+        .classList.add("active");
+
+
+      if (button.dataset.view === "table") {
+        renderTable();
+      }
+
+      if (button.dataset.view === "graph") {
+        renderGraph();
+      }
+
+    });
+
+  });
+
+
+  /* =============================
+     GLASSES
+  ============================== */
+
+  const glassesElement =
+    document.getElementById("glasses");
+
+
+  function createGlasses() {
+
+    glassesElement.innerHTML = "";
+
+    for (let i = 0; i < GLASS_COUNT; i++) {
+
+      const glass = document.createElement("div");
+
+      glass.className = "glass";
+
+      glass.innerHTML =
+        `<div class="water"></div>`;
+
+      glassesElement.appendChild(glass);
+
+    }
+
   }
 
-  .nav-icon {
-    width: 14px;
-    height: 14px;
+
+  function renderCard() {
+
+    const today = new Date();
+
+    const total = getTotal(today);
+
+    document.getElementById("dailyAmount")
+      .textContent = total;
+
+
+    const waters =
+      document.querySelectorAll(".water");
+
+
+    waters.forEach((water, index) => {
+
+      const glassStart =
+        index * GLASS_SIZE;
+
+      let fill =
+        ((total - glassStart) / GLASS_SIZE) * 100;
+
+      fill = Math.max(0, Math.min(100, fill));
+
+      water.style.height = fill + "%";
+
+    });
+
   }
 
-  .daily-label {
-    font-size: 9px;
+
+  /* =============================
+     ADD WATER
+  ============================== */
+
+  const modal =
+    document.getElementById("modal");
+
+  const amountInput =
+    document.getElementById("amountInput");
+
+
+  document
+    .getElementById("openModal")
+    .addEventListener("click", () => {
+
+      amountInput.value = "";
+
+      modal.classList.add("open");
+
+      setTimeout(() => amountInput.focus(), 100);
+
+    });
+
+
+  document
+    .getElementById("cancelModal")
+    .addEventListener("click", closeModal);
+
+
+  modal.addEventListener("click", event => {
+
+    if (event.target === modal) {
+      closeModal();
+    }
+
+  });
+
+
+  function closeModal() {
+
+    modal.classList.remove("open");
+
   }
 
-  .daily-value {
-    font-size: 20px;
+
+  document
+    .querySelectorAll(".quick")
+    .forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        amountInput.value =
+          button.dataset.amount;
+
+      });
+
+    });
+
+
+  document
+    .getElementById("addWater")
+    .addEventListener("click", addWater);
+
+
+  amountInput.addEventListener("keydown", event => {
+
+    if (event.key === "Enter") {
+      addWater();
+    }
+
+  });
+
+
+  function addWater() {
+
+    const amount =
+      Number(amountInput.value);
+
+    if (!amount || amount <= 0) {
+      return;
+    }
+
+
+    const now = new Date();
+
+    const key = dateKey(now);
+
+
+    if (!records[key]) {
+      records[key] = [];
+    }
+
+
+    records[key].push({
+
+      id: Date.now(),
+
+      amount: amount,
+
+      timestamp: now.toISOString()
+
+    });
+
+
+    saveRecords();
+
+    closeModal();
+
+    renderCard();
+
   }
 
-  .day-value {
-    font-size: 6px;
+
+  /* =============================
+     TABLE
+  ============================== */
+
+  function renderTable() {
+
+    const entries =
+      getEntries(selectedDate);
+
+
+    const total =
+      getTotal(selectedDate);
+
+
+    document.getElementById("tableTotal")
+      .textContent = total;
+
+
+    document.getElementById("dateTitle")
+      .textContent =
+      selectedDate
+        .toLocaleDateString(
+          "en-US",
+          {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+          }
+        )
+        .toUpperCase();
+
+
+    const body =
+      document.getElementById("historyBody");
+
+    const empty =
+      document.getElementById("emptyHistory");
+
+
+    body.innerHTML = "";
+
+
+    if (entries.length === 0) {
+
+      empty.style.display = "block";
+
+      return;
+
+    }
+
+
+    empty.style.display = "none";
+
+
+    let cumulative = 0;
+
+
+    entries.forEach(entry => {
+
+      cumulative += entry.amount;
+
+
+      const date =
+        new Date(entry.timestamp);
+
+
+      const time =
+        date.toLocaleTimeString(
+          "en-US",
+          {
+            hour: "2-digit",
+            minute: "2-digit"
+          }
+        );
+
+
+      const row =
+        document.createElement("tr");
+
+
+      row.innerHTML = `
+
+        <td>${time}</td>
+
+        <td>+${entry.amount} ml</td>
+
+        <td class="cumulative">
+          ${cumulative} ml
+        </td>
+
+        <td>
+
+          <button
+            class="delete-button"
+            data-id="${entry.id}"
+          >
+            ♡
+          </button>
+
+        </td>
+
+      `;
+
+
+      body.appendChild(row);
+
+    });
+
+
+    document
+      .querySelectorAll(".delete-button")
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => deleteEntry(
+            Number(button.dataset.id)
+          )
+        );
+
+      });
+
   }
-}
-</style>
+
+
+  function deleteEntry(id) {
+
+    const key =
+      dateKey(selectedDate);
+
+
+    if (!records[key]) {
+      return;
+    }
+
+
+    records[key] =
+      records[key].filter(
+        entry => entry.id !== id
+      );
+
+
+    if (records[key].length === 0) {
+      delete records[key];
+    }
+
+
+    saveRecords();
+
+    renderTable();
+
+    renderCard();
+
+  }
+
+
+  document
+    .getElementById("previousDay")
+    .addEventListener("click", () => {
+
+      selectedDate.setDate(
+        selectedDate.getDate() - 1
+      );
+
+      selectedDate =
+        new Date(selectedDate);
+
+      renderTable();
+
+    });
+
+
+  document
+    .getElementById("nextDay")
+    .addEventListener("click", () => {
+
+      selectedDate.setDate(
+        selectedDate.getDate() + 1
+      );
+
+      selectedDate =
+        new Date(selectedDate);
+
+      renderTable();
+
+    });
+
+
+  /* =============================
+     GRAPH
+  ============================== */
+
+  function getWeekDates() {
+
+    const today =
+      new Date();
+
+
+    const day =
+      today.getDay();
+
+
+    /*
+      Monday = first day
+    */
+
+    const difference =
+      day === 0 ? -6 : 1 - day;
+
+
+    const monday =
+      new Date(today);
+
+
+    monday.setDate(
+      today.getDate() + difference
+    );
+
+
+    const dates = [];
+
+
+    for (let i = 0; i < 7; i++) {
+
+      const date =
+        new Date(monday);
+
+      date.setDate(
+        monday.getDate() + i
+      );
+
+      dates.push(date);
+
+    }
+
+
+    return dates;
+
+  }
+
+
+  function renderGraph() {
+
+    const chart =
+      document.getElementById("chart");
+
+
+    chart.innerHTML = "";
+
+
+    const dates =
+      getWeekDates();
+
+
+    dates.forEach(date => {
+
+      const total =
+        getTotal(date);
+
+
+      /*
+        Graph maximum = daily goal.
+      */
+
+      const percentage =
+        Math.min(
+          100,
+          (total / DAILY_GOAL) * 100
+        );
+
+
+      const day =
+        document.createElement("div");
+
+
+      day.className =
+        "chart-day";
+
+
+      const dayName =
+        date
+          .toLocaleDateString(
+            "en-US",
+            { weekday: "short" }
+          )
+          .toUpperCase();
+
+
+      day.innerHTML = `
+
+        <div class="bar-container">
+
+          <div
+            class="bar-fill"
+            style="height:${percentage}%"
+          ></div>
+
+        </div>
+
+        <div class="day-name">
+          ${dayName}
+        </div>
+
+        <div class="day-value">
+          ${total}ml
+        </div>
+
+      `;
+
+
+      chart.appendChild(day);
+
+    });
+
+  }
+
+
+  /* =============================
+     INITIALIZE
+  ============================== */
+
+  createGlasses();
+
+  renderCard();
+
+  renderTable();
+
+  renderGraph();
+
+</script>
+
+</body>
+</html>
